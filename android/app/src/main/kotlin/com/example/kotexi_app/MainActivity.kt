@@ -1,4 +1,4 @@
-package com.example.kotexi_app
+package com.kotexi.kovisor
 
 import android.app.Activity
 import android.app.admin.DevicePolicyManager
