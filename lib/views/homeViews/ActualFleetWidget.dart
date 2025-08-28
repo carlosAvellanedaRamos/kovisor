@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../api/socketService.dart';
 import 'dart:async';
 
+import '../../models/kovisor_colors.dart';
+
 class ActualFleetWidget extends StatefulWidget {
   const ActualFleetWidget({super.key});
 
@@ -25,7 +27,8 @@ class _ActualFleetWidgetState extends State<ActualFleetWidget> {
   void _updateTime() {
     final now = DateTime.now();
     setState(() {
-      _currentTime = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}";
+      _currentTime =
+      "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}";
       _timeFormat = now.hour >= 12 ? "PM" : "AM";
     });
   }
@@ -76,9 +79,9 @@ class _ActualFleetWidgetState extends State<ActualFleetWidget> {
   Widget build(BuildContext context) {
     return Consumer<VehiclesWSProvider>(
       builder: (context, wsProvider, _) {
-        // SOLO mostrar Card de advertencia si hay mensaje especial
         if (wsProvider.specialMessage != null) {
           return Card(
+            color: KovisorColors.fondoOscuro,
             margin: const EdgeInsets.all(16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             child: SizedBox(
@@ -88,12 +91,12 @@ class _ActualFleetWidgetState extends State<ActualFleetWidget> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 48),
+                    Icon(Icons.warning_amber_rounded, color: KovisorColors.naranja, size: 48),
                     const SizedBox(height: 12),
                     Text(
                       wsProvider.specialMessage!,
-                      style: const TextStyle(
-                        color: Colors.red,
+                      style: TextStyle(
+                        color: KovisorColors.rojo,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -106,12 +109,12 @@ class _ActualFleetWidgetState extends State<ActualFleetWidget> {
           );
         }
 
-        // Si NO hay mensaje especial, sigue la lógica normal
         final device = wsProvider.currentDevice;
         final plate = wsProvider.plate ?? "";
 
         if (device == null) {
           return Card(
+            color: KovisorColors.fondoOscuro,
             margin: const EdgeInsets.all(16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             child: const SizedBox(
@@ -121,12 +124,12 @@ class _ActualFleetWidgetState extends State<ActualFleetWidget> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(),
+                    CircularProgressIndicator(color: KovisorColors.azulClaro),
                     SizedBox(height: 12),
                     Text(
                       'Conectando...',
                       style: TextStyle(
-                        color: Colors.grey,
+                        color: KovisorColors.grisClaro,
                         fontSize: 14,
                       ),
                     ),
@@ -140,6 +143,7 @@ class _ActualFleetWidgetState extends State<ActualFleetWidget> {
         final currentGeofenceTime = _getCurrentGeofenceTime(device);
 
         return Card(
+          color: KovisorColors.fondoOscuro,
           margin: const EdgeInsets.all(16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           child: SizedBox(
@@ -154,9 +158,9 @@ class _ActualFleetWidgetState extends State<ActualFleetWidget> {
                     children: [
                       Text(
                         "FLOTA ACTUAL ${device.name}",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey,
+                          color: KovisorColors.azulClaro,
                           fontWeight: FontWeight.w600,
                         ),
                         textAlign: TextAlign.center,
@@ -169,7 +173,8 @@ class _ActualFleetWidgetState extends State<ActualFleetWidget> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade200),
+                        color: Colors.transparent,
+                        border: Border.all(color: KovisorColors.grisClaro.withOpacity(0.15)),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
@@ -179,9 +184,9 @@ class _ActualFleetWidgetState extends State<ActualFleetWidget> {
                           children: [
                             Text(
                               _currentTime,
-                              style: const TextStyle(
-                                fontSize: 32,
-                                color: Color(0xFF8A98A9),
+                              style: TextStyle(
+                                fontSize: 38,
+                                color: KovisorColors.amarilloHora,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 1.2,
                               ),
@@ -189,9 +194,9 @@ class _ActualFleetWidgetState extends State<ActualFleetWidget> {
                             ),
                             Text(
                               _timeFormat,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 22,
-                                color: Color(0xFF8A98A9),
+                                color: KovisorColors.blanco,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -205,9 +210,9 @@ class _ActualFleetWidgetState extends State<ActualFleetWidget> {
                       const SizedBox(height: 8),
                       Text(
                         "($plate)",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey,
+                          color: KovisorColors.grisClaro,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -215,9 +220,9 @@ class _ActualFleetWidgetState extends State<ActualFleetWidget> {
                       const SizedBox(height: 4),
                       Text(
                         device.currentGeofence ?? "Sin ubicación",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
-                          color: Colors.grey,
+                          color: KovisorColors.blanco,
                           fontWeight: FontWeight.w500,
                         ),
                         textAlign: TextAlign.center,
@@ -228,9 +233,9 @@ class _ActualFleetWidgetState extends State<ActualFleetWidget> {
                         const SizedBox(height: 2),
                         Text(
                           currentGeofenceTime,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey,
+                            color: KovisorColors.azulClaro,
                             fontWeight: FontWeight.w400,
                           ),
                           textAlign: TextAlign.center,

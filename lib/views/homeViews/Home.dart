@@ -8,6 +8,7 @@ import 'VehiclesWidget.dart';
 import '../../api/userService.dart';
 import 'UserInfoDialog.dart';
 import 'package:provider/provider.dart';
+import '../../models/kovisor_colors.dart';
 
 class Home extends StatefulWidget {
   final void Function()? onLogout;
@@ -22,13 +23,12 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    // Asegurar que las barras del sistema estén configuradas correctamente
     _configureSystemUI();
   }
 
   void _configureSystemUI() {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Color(0xFF0093e8), // Color que coincida con el AppBar
+      statusBarColor: Color(0xFF0093e8),
       statusBarIconBrightness: Brightness.light,
       systemNavigationBarColor: Colors.black,
       systemNavigationBarIconBrightness: Brightness.light,
@@ -39,26 +39,16 @@ class _HomeState extends State<Home> {
   void _logout() async {
     try {
       print('Iniciando proceso de logout...');
-
-      // 1. Cerrar sesión en el servidor y limpiar datos locales
       await AuthService.logout();
-
-      // 2. Desconectar WebSocket
       final wsProvider = Provider.of<VehiclesWSProvider>(context, listen: false);
       await wsProvider.disconnect();
       print('WebSocket desconectado');
-
-      // 3. Pausa para asegurar que todo se limpie
       await Future.delayed(const Duration(milliseconds: 500));
-
-      // 4. Notificar al widget padre
       if (widget.onLogout != null) {
         widget.onLogout!();
       }
-
     } catch (e) {
       print('Error en logout: $e');
-      // Aún así ejecutar logout
       if (widget.onLogout != null) {
         widget.onLogout!();
       }
@@ -85,6 +75,16 @@ class _HomeState extends State<Home> {
           ],
         ),
         actions: [
+          // Ícono de altavoz parpadeante para alerta de voz
+          Consumer<VehiclesWSProvider>(
+              builder: (context, wsProvider, _) {
+                return AnimatedOpacity(
+                  opacity: wsProvider.isVoiceAlertActive ? 1.0 : 0.3,
+                  duration: const Duration(milliseconds: 300),
+                  child: Icon(Icons.volume_up, color: KovisorColors.purpuraAlerta, size: 32),
+                );
+              }
+          ),
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
             tooltip: 'Finalizar sesión',
@@ -129,7 +129,7 @@ class _HomeState extends State<Home> {
         ],
       ),
       body: SafeArea(
-        bottom: true, // Importante: protege contra la barra de navegación
+        bottom: true,
         child: Container(
           width: double.infinity,
           height: double.infinity,

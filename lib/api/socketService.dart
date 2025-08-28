@@ -49,6 +49,23 @@ class KovisorWebSocketService extends ChangeNotifier {
   bool? _previousTripCompleted;
   String? _lastAnnouncedGeofence;
 
+  bool _isVoiceAlertActive = false;
+  Timer? _voiceAlertTimer;
+
+  void emitVoiceAlert(String message) {
+    TTSService.speak(message);
+    _isVoiceAlertActive = true;
+    notifyListeners();
+    _voiceAlertTimer?.cancel();
+    _voiceAlertTimer = Timer(const Duration(seconds: 2), () {
+      _isVoiceAlertActive = false;
+      notifyListeners();
+    });
+  }
+
+  bool get isVoiceAlertActive => _isVoiceAlertActive;
+
+
   void _showTripNotification(String message) {
     // Voz
     TTSService.speak(message);
@@ -436,6 +453,19 @@ class KovisorWebSocketService extends ChangeNotifier {
         print('FORZANDO mensaje especial porque los datos están vacíos');
         notifyListeners();
         return;
+      }
+
+      if (specialMessage == null && nextDevices.isNotEmpty) {
+        final minNextTime = nextDevices[0].timeDifference;
+        if (minNextTime <= 1) {
+          emitVoiceAlert("Está muy cerca del primer vehículo, mantenga su distancia.");
+        }
+      }
+      if (specialMessage == null && prevDevices.isNotEmpty) {
+        final minPrevTime = prevDevices[0].timeDifference;
+        if (minPrevTime <= 1) {
+          emitVoiceAlert("Avance, el vehículo de atrás está muy cerca.");
+        }
       }
 
       // 4. SI HAY DATOS REALES: Procesar normalmente

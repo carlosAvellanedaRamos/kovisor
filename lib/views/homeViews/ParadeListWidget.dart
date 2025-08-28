@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../api/socketService.dart';
+import '../../models/kovisor_colors.dart';
 
 class ParadeListWidget extends StatefulWidget {
   const ParadeListWidget({super.key});
@@ -83,6 +84,12 @@ class _ParadeListWidgetState extends State<ParadeListWidget> {
     }
   }
 
+  Color getMinutesLateColor(int minutesLate) {
+    if (minutesLate > 0) return KovisorColors.rojo;
+    if (minutesLate < 0) return KovisorColors.verde;
+    return KovisorColors.blanco;
+  }
+
   @override
   Widget build(BuildContext context) {
     print('ParadeListWidget build() ejecutado');
@@ -90,6 +97,7 @@ class _ParadeListWidgetState extends State<ParadeListWidget> {
       builder: (context, wsProvider, _) {
         if (wsProvider.specialMessage != null) {
           return Card(
+            color: KovisorColors.fondoOscuro,
             margin: const EdgeInsets.all(16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             child: SizedBox(
@@ -99,12 +107,12 @@ class _ParadeListWidgetState extends State<ParadeListWidget> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 48),
+                    Icon(Icons.warning_amber_rounded, color: KovisorColors.naranja, size: 48),
                     const SizedBox(height: 12),
                     Text(
                       wsProvider.specialMessage!,
-                      style: const TextStyle(
-                        color: Colors.red,
+                      style: TextStyle(
+                        color: KovisorColors.rojo,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -134,6 +142,7 @@ class _ParadeListWidgetState extends State<ParadeListWidget> {
         }
 
         return Card(
+          color: KovisorColors.fondoOscuro,
           margin: const EdgeInsets.all(16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           child: SizedBox(
@@ -145,9 +154,9 @@ class _ParadeListWidgetState extends State<ParadeListWidget> {
                   padding: const EdgeInsets.only(top: 14, left: 16, right: 16, bottom: 8),
                   child: Text(
                     routeName.isNotEmpty ? routeName : 'Cargando ruta...',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
-                      color: Colors.grey,
+                      color: KovisorColors.azulClaro,
                       fontWeight: FontWeight.w500,
                     ),
                     textAlign: TextAlign.center,
@@ -161,12 +170,12 @@ class _ParadeListWidgetState extends State<ParadeListWidget> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CircularProgressIndicator(),
+                        CircularProgressIndicator(color: KovisorColors.azulClaro),
                         SizedBox(height: 12),
                         Text(
                           'Cargando paraderos...',
                           style: TextStyle(
-                            color: Colors.grey,
+                            color: KovisorColors.grisClaro,
                             fontSize: 14,
                           ),
                         ),
@@ -193,10 +202,12 @@ class _ParadeListWidgetState extends State<ParadeListWidget> {
                           margin: const EdgeInsets.only(bottom: 1.0),
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: isCurrent ? Colors.blue.shade50 : Colors.transparent,
+                            color: isCurrent
+                                ? KovisorColors.azulClaro.withOpacity(0.12)
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                             border: isCurrent
-                                ? Border.all(color: Colors.blue.shade200, width: 1)
+                                ? Border.all(color: KovisorColors.azulClaro, width: 1)
                                 : null,
                           ),
                           child: Row(
@@ -207,13 +218,13 @@ class _ParadeListWidgetState extends State<ParadeListWidget> {
                                 height: 34,
                                 decoration: BoxDecoration(
                                   color: isCurrent
-                                      ? Colors.blue.shade400
-                                      : Colors.pink.shade400,
+                                      ? KovisorColors.azulClaro
+                                      : KovisorColors.naranja,
                                   shape: BoxShape.circle,
                                   boxShadow: isCurrent
                                       ? [
                                     BoxShadow(
-                                      color: Colors.blue.shade200,
+                                      color: KovisorColors.azulClaro.withOpacity(0.5),
                                       blurRadius: 3,
                                       offset: const Offset(0, 1),
                                     ),
@@ -223,8 +234,8 @@ class _ParadeListWidgetState extends State<ParadeListWidget> {
                                 alignment: Alignment.center,
                                 child: Text(
                                   parada.minutesLate.toString(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: getMinutesLateColor(parada.minutesLate),
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
                                   ),
@@ -239,8 +250,12 @@ class _ParadeListWidgetState extends State<ParadeListWidget> {
                                     Text(
                                       parada.geofenceName,
                                       style: TextStyle(
-                                        color: isCurrent ? Colors.blue.shade700 : Colors.black87,
-                                        fontWeight: isCurrent ? FontWeight.bold : FontWeight.w500,
+                                        color: isCurrent
+                                            ? KovisorColors.blanco
+                                            : KovisorColors.grisClaro,
+                                        fontWeight: isCurrent
+                                            ? FontWeight.bold
+                                            : FontWeight.w500,
                                         fontSize: 15,
                                       ),
                                       maxLines: 1,
@@ -250,7 +265,7 @@ class _ParadeListWidgetState extends State<ParadeListWidget> {
                                       Text(
                                         'Programado: ${parada.scheduled}',
                                         style: TextStyle(
-                                          color: Colors.grey.shade600,
+                                          color: KovisorColors.azulClaro,
                                           fontSize: 10,
                                           fontWeight: FontWeight.w400,
                                         ),
@@ -262,13 +277,13 @@ class _ParadeListWidgetState extends State<ParadeListWidget> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: Colors.green.shade400,
+                                    color: KovisorColors.verde,
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: const Text(
                                     'ACTUAL',
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: KovisorColors.fondoOscuro,
                                       fontSize: 8,
                                       fontWeight: FontWeight.bold,
                                     ),

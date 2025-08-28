@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../api/socketService.dart';
 import '../../models/device_ws_model.dart';
+import '../../models/kovisor_colors.dart';
 
 class VehiclesWidget extends StatefulWidget {
   const VehiclesWidget({super.key});
@@ -12,19 +13,13 @@ class VehiclesWidget extends StatefulWidget {
 
 class _VehiclesWidgetState extends State<VehiclesWidget> {
   @override
-  void initState() {
-    super.initState();
-    print('VehiclesWidget iniciado');
-  }
-
-  @override
   Widget build(BuildContext context) {
-    print('VehiclesWidget build() ejecutado');
     return Consumer<VehiclesWSProvider>(
       builder: (context, wsProvider, child) {
-        // Mostrar mensaje especial si existe
+        // No lógicas de alerta aquí, solo renderizado UI!
         if (wsProvider.specialMessage != null) {
           return Card(
+            color: KovisorColors.fondoOscuro,
             margin: const EdgeInsets.all(16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             child: Container(
@@ -34,12 +29,12 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 48),
+                    Icon(Icons.warning_amber_rounded, color: KovisorColors.naranja, size: 48),
                     const SizedBox(height: 12),
                     Text(
                       wsProvider.specialMessage!,
-                      style: const TextStyle(
-                        color: Colors.red,
+                      style: TextStyle(
+                        color: KovisorColors.rojo,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -52,26 +47,26 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
           );
         }
 
-        final debugInfo = wsProvider.getDebugInfo();
-        print('VehiclesWidget Consumer rebuild:');
-        print('   - IsConnected: ${debugInfo['isConnected']}');
-        print('   - LastUpdate: ${debugInfo['lastDataUpdate']}');
-        print('   - PrevDevices: ${debugInfo['prevDevicesCount']}');
-        print('   - NextDevices: ${debugInfo['nextDevicesCount']}');
-        print('   - PrevDetails: ${debugInfo['prevDevicesDetails']}');
-        print('   - NextDetails: ${debugInfo['nextDevicesDetails']}');
-
-        // Ordenar dispositivos "Delante" por timeDifference DESCENDENTE (mayor a menor)
         final sortedNextDevices = List<DeviceWS>.from(wsProvider.nextDevices);
         sortedNextDevices.sort((a, b) => b.timeDifference.compareTo(a.timeDifference));
-
         final sortedPrevDevices = wsProvider.prevDevices;
 
-        print('Ordenamiento aplicado:');
-        print('   - Delante (ordenado desc): ${sortedNextDevices.map((d) => '${d.name}:${d.timeDifference}min').toList()}');
-        print('   - Atrás (orden original): ${sortedPrevDevices.map((d) => '${d.name}:${d.timeDifference}min').toList()}');
+        Color getVehicleColor(double timeDifference) {
+          if (timeDifference <= 1) return KovisorColors.purpuraAlerta;
+          if (timeDifference > 1 && timeDifference <= 3) return KovisorColors.naranja;
+          if (timeDifference > 3) return KovisorColors.verde;
+          return KovisorColors.grisClaro;
+        }
+
+        Color getTextColor(double timeDifference) {
+          if (timeDifference <= 1) return KovisorColors.purpuraAlerta;
+          if (timeDifference > 1 && timeDifference <= 3) return KovisorColors.naranja;
+          if (timeDifference > 3) return KovisorColors.verde;
+          return KovisorColors.grisClaro;
+        }
 
         return Card(
+          color: KovisorColors.fondoOscuro,
           margin: const EdgeInsets.all(16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           child: Container(
@@ -83,12 +78,12 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
               children: [
                 Column(
                   children: [
-                    const Text(
+                    Text(
                       'VEHÍCULOS - PLACA(MIN)',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: Colors.grey,
+                        color: KovisorColors.azulClaro,
                         letterSpacing: 1.2,
                       ),
                       textAlign: TextAlign.center,
@@ -102,14 +97,14 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
                             Icon(
                               Icons.circle,
                               size: 8,
-                              color: Colors.green,
+                              color: KovisorColors.verde,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               'Conectado',
                               style: TextStyle(
                                 fontSize: 10,
-                                color: Colors.green,
+                                color: KovisorColors.verde,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -128,18 +123,19 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
                     children: [
                       Row(
                         children: [
-                          const Text(
+                          Text(
                             'Delante',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
+                              color: KovisorColors.blanco,
                             ),
                           ),
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.blue.shade100,
+                              color: KovisorColors.azulClaro.withOpacity(0.18),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
@@ -147,7 +143,7 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.blue.shade700,
+                                color: KovisorColors.azulClaro,
                               ),
                             ),
                           ),
@@ -156,11 +152,11 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
                       const SizedBox(height: 4),
                       Expanded(
                         child: sortedNextDevices.isEmpty
-                            ? const Center(
+                            ? Center(
                           child: Text(
                             'Sin flotas por delante',
                             style: TextStyle(
-                              color: Colors.grey,
+                              color: KovisorColors.grisClaro,
                               fontSize: 12,
                             ),
                           ),
@@ -170,7 +166,8 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
                           itemCount: sortedNextDevices.length,
                           itemBuilder: (context, index) {
                             final device = sortedNextDevices[index];
-                            print('Renderizando device adelante (ordenado): ${device.name} - ${device.timeDifference}min');
+                            final color = getVehicleColor(device.timeDifference);
+                            final textColor = getTextColor(device.timeDifference);
 
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 1),
@@ -180,8 +177,8 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
                                   Flexible(
                                     child: Text(
                                       device.name,
-                                      style: const TextStyle(
-                                        color: Colors.blue,
+                                      style: TextStyle(
+                                        color: textColor,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,
                                       ),
@@ -191,13 +188,13 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                                     decoration: BoxDecoration(
-                                      color: Colors.pink.shade50,
+                                      color: color.withOpacity(0.15),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
                                       "(${device.timeDifference.toStringAsFixed(1)} min)",
-                                      style: const TextStyle(
-                                        color: Colors.pink,
+                                      style: TextStyle(
+                                        color: color,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 16,
                                       ),
@@ -220,9 +217,9 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.grey.shade300,
-                        Colors.grey.shade400,
-                        Colors.grey.shade300,
+                        KovisorColors.grisClaro.withOpacity(0.3),
+                        KovisorColors.azulClaro.withOpacity(0.5),
+                        KovisorColors.grisClaro.withOpacity(0.3),
                       ],
                     ),
                   ),
@@ -236,18 +233,19 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
                     children: [
                       Row(
                         children: [
-                          const Text(
+                          Text(
                             'Atrás',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
+                              color: KovisorColors.blanco,
                             ),
                           ),
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.orange.shade100,
+                              color: KovisorColors.naranja.withOpacity(0.18),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
@@ -255,7 +253,7 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.orange.shade700,
+                                color: KovisorColors.naranja,
                               ),
                             ),
                           ),
@@ -264,11 +262,11 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
                       const SizedBox(height: 4),
                       Expanded(
                         child: sortedPrevDevices.isEmpty
-                            ? const Center(
+                            ? Center(
                           child: Text(
                             'Sin flotas por detrás',
                             style: TextStyle(
-                              color: Colors.grey,
+                              color: KovisorColors.grisClaro,
                               fontSize: 12,
                             ),
                           ),
@@ -278,7 +276,8 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
                           itemCount: sortedPrevDevices.length,
                           itemBuilder: (context, index) {
                             final device = sortedPrevDevices[index];
-                            print('Renderizando device atrás (orden original): ${device.name} - ${device.timeDifference}min');
+                            final color = getVehicleColor(device.timeDifference);
+                            final textColor = getTextColor(device.timeDifference);
 
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 1),
@@ -288,8 +287,8 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
                                   Flexible(
                                     child: Text(
                                       device.name,
-                                      style: const TextStyle(
-                                        color: Colors.blue,
+                                      style: TextStyle(
+                                        color: textColor,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,
                                       ),
@@ -299,13 +298,13 @@ class _VehiclesWidgetState extends State<VehiclesWidget> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                                     decoration: BoxDecoration(
-                                      color: Colors.pink.shade50,
+                                      color: color.withOpacity(0.15),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
                                       "(${device.timeDifference.toStringAsFixed(1)} min)",
-                                      style: const TextStyle(
-                                        color: Colors.pink,
+                                      style: TextStyle(
+                                        color: color,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 16,
                                       ),
